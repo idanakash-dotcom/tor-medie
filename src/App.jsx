@@ -340,6 +340,37 @@ export default function App() {
   const isAdmin = currentUser==="admin";
 
   // ══════════════════════════════════════════════════════════════════════════
+  // PIN FLOW — must be checked BEFORE currentUser check
+  // ══════════════════════════════════════════════════════════════════════════
+  if (pinFlow) {
+    const target = pinFlow.target;
+    const child  = CHILDREN[target];
+    const isAdminTarget = target==="admin";
+
+    return (
+      <div dir="rtl" style={{minHeight:"100vh",background:"linear-gradient(145deg,#fef9f0,#f0ebff)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Heebo',sans-serif"}}>
+        <div style={{background:"#fff",borderRadius:28,boxShadow:"0 12px 48px rgba(0,0,0,0.12)",width:"100%",maxWidth:380,margin:16}}>
+          <PinScreen
+            title={isAdminTarget ? "כניסת הורה" : `שלום ${child?.label} ${child?.emoji}`}
+            subtitle={isAdminTarget ? "הזן קוד הורה" : "הזן את הקוד שלך"}
+            onSuccess={(enteredPin, onError) => {
+              const resolved = resolvePin(enteredPin);
+              if (resolved==="admin" || resolved===target) {
+                setPinFlow(null);
+                setCurrentUser(resolved==="admin" && target!=="admin" ? target : resolved);
+                if (resolved==="admin" && target==="admin") setScreen("admin");
+              } else {
+                onError();
+              }
+            }}
+            onCancel={()=>setPinFlow(null)}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
   // SELECT USER SCREEN
   // ══════════════════════════════════════════════════════════════════════════
   if (!currentUser) {
@@ -364,38 +395,6 @@ export default function App() {
             background:"#f8fafc",cursor:"pointer",fontSize:18,fontWeight:700,
             color:"#475569",fontFamily:"'Heebo',sans-serif",
             WebkitTapHighlightColor:"transparent"}}>🔐 הורה</button>
-        </div>
-      </div>
-    );
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // PIN FLOW — shown as overlay / full screen
-  // ══════════════════════════════════════════════════════════════════════════
-  if (pinFlow) {
-    const target = pinFlow.target;
-    const child  = CHILDREN[target];
-    const isAdminTarget = target==="admin";
-
-    return (
-      <div dir="rtl" style={{minHeight:"100vh",background:"linear-gradient(145deg,#fef9f0,#f0ebff)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Heebo',sans-serif"}}>
-        <div style={{background:"#fff",borderRadius:28,boxShadow:"0 12px 48px rgba(0,0,0,0.12)",width:"100%",maxWidth:380,margin:16}}>
-          <PinScreen
-            title={isAdminTarget ? "כניסת הורה" : `שלום ${child.label} ${child.emoji}`}
-            subtitle={isAdminTarget ? "הזן קוד הורה" : "הזן את הקוד שלך"}
-            onSuccess={(enteredPin, onError) => {
-              const resolved = resolvePin(enteredPin);
-              // Admin PIN opens any target; child PIN must match
-              if (resolved==="admin" || resolved===target) {
-                setPinFlow(null);
-                setCurrentUser(resolved==="admin" && target!=="admin" ? target : resolved);
-                if (resolved==="admin" && target==="admin") setScreen("admin");
-              } else {
-                onError(); // shake & clear
-              }
-            }}
-            onCancel={()=>{ setPinFlow(null); if (!currentUser) {} }}
-          />
         </div>
       </div>
     );
