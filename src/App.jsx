@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabase.js";
+import MultiplicationGame from "./MultiplicationGame.jsx";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const CHILDREN = {
@@ -436,6 +437,7 @@ export default function App() {
         {[
           {id:"home",label:"🏠 בית"},
           {id:"history",label:"📜 היסטוריה"},
+          {id:"game",label:"✖️ כפל"},
           ...(isAdmin?[{id:"admin",label:"⚙️ ניהול"}]:[]),
         ].map(tab=>(
           <button key={tab.id} onClick={()=>setScreen(tab.id)} style={{
@@ -553,6 +555,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* ══ GAME ══════════════════════════════════════════════════════════ */}
+      {screen==="game" && <MultiplicationGame />}
 
       {/* ══ ADMIN ═════════════════════════════════════════════════════════ */}
       {screen==="admin" && isAdmin && (
